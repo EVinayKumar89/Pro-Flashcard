@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pro Flashcards</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+      :root {
+        --bg-color: #f9f9fd;
+        --card-bg: #ffffff;
+        --primary: #6366f1;
+        --primary-light: #e0e7ff;
+        --primary-dark: #4338ca;
+        --accent: #f59e0b;
+        --accent-light: #fef3c7;
+        --success: #10b981;
+        --success-light: #d1fae5;
+        --danger: #ef4444;
+        --danger-light: #fee2e2;
+        --text: #1e293b;
+        --text-light: #64748b;
+        --gold: #d4af37;
+        --silver: #c0c0c0;
+        --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.05);
+        --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+        --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+        --shadow-gold: 0 10px 25px rgba(212, 175, 55, 0.15);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: 'Montserrat', sans-serif;
+        background-color: var(--bg-color);
+        background-image: 
+          radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.03) 0%, transparent 40%),
+          radial-gradient(circle at 85% 85%, rgba(245, 158, 11, 0.03) 0%, transparent 40%),
+          linear-gradient(120deg, rgba(212, 175, 55, 0.02) 0%, transparent 100%);
+        color: var(--text);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 2rem;
+        line-height: 1.6;
+      }
+
+      .app-container {
+        width: 100%;
+        max-width: 520px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-radius: 24px;
+        padding: 2.5rem;
+        box-shadow: var(--shadow-md), 0 0 0 1px rgba(255, 255, 255, 0.1);
+      }
+
+      header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+        position: relative;
+        width: 100%;
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 0.75rem;
+      }
+
+      .logo-icon {
+        font-size: 1.75rem;
+        margin-right: 0.5rem;
+        background: linear-gradient(135deg, var(--gold) 0%, var(--primary) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      h1 {
+        font-weight: 700;
+        font-size: 2.25rem;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--gold) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: -0.5px;
+      }
+
+      .subtitle {
+        color: var(--text-light);
+        font-size: 1rem;
+        font-weight: 400;
+        letter-spacing: 0.2px;
+      }
+
+      .flashcard-container {
+        position: relative;
+        width: 100%;
+        height: 280px;
+        perspective: 1000px;
+        margin-bottom: 2rem;
+      }
+
+      .flashcard {
+        width: 100%;
+        height: 100%;
+        border-radius: 20px;
+        position: relative;
+        transform-style: preserve-3d;
+        transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: var(--shadow-md);
+        cursor: pointer;
+        background-color: var(--card-bg);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .flashcard:hover {
+        box-shadow: var(--shadow-gold);
+        transform: translateY(-5px);
+      }
+
+      .flipped {
+        transform: rotateY(180deg);
+      }
+
+      .flipped:hover {
+        transform: rotateY(180deg) translateY(-5px);
+      }
+
+      .side {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        backface-visibility: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        font-size: 1.5rem;
+        text-align: center;
+        border-radius: 20px;
+        overflow: hidden;
+      }
+
+      .side::before {
+        content: '';
+        position: absolute;
+        top: 1.25rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-light);
+        text-transform: uppercase;
+        letter-spacing: 2px;
+      }
+
+      .side::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: linear-gradient(90deg, var(--primary) 0%, var(--gold) 100%);
+        opacity: 0.7;
+      }
+
+      .front {
+        background: linear-gradient(135deg, var(--primary-light) 0%, white 100%);
+      }
+
+      .front::before {
+        content: 'Question';
+      }
+
+      .back {
+        background: linear-gradient(135deg, var(--accent-light) 0%, white 100%);
+        transform: rotateY(180deg);
+      }
+
+      .back::before {
+        content: 'Answer';
+      }
+
+      .card-content {
+        font-weight: 500;
+        max-width: 100%;
+        word-wrap: break-word;
+      }
+
+      .flip-hint {
+        position: absolute;
+        bottom: 1.25rem;
+        font-size: 0.75rem;
+        color: var(--text-light);
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        opacity: 0.8;
+        transition: opacity 0.3s ease;
+      }
+
+      .flashcard:hover .flip-hint {
+        opacity: 1;
+      }
+
+      .controls {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        width: 100%;
+      }
+
+      button {
+        flex: 1;
+        padding: 0.85rem 1.5rem;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        box-shadow: var(--shadow-sm);
+        font-family: 'Montserrat', sans-serif;
+        letter-spacing: 0.5px;
+      }
+
+      button:active {
+        transform: translateY(2px);
+      }
+
+      .btn-know {
+        background: var(--success-light);
+        color: var(--success);
+        border: 1px solid rgba(16, 185, 129, 0.1);
+      }
+
+      .btn-know:hover {
+        background: var(--success);
+        color: white;
+        box-shadow: 0 5px 15px rgba(16, 185, 129, 0.2);
+      }
+
+      .btn-dont {
+        background: var(--danger-light);
+        color: var(--danger);
+        border: 1px solid rgba(239, 68, 68, 0.1);
+      }
+
+      .btn-dont:hover {
+        background: var(--danger);
+        color: white;
+        box-shadow: 0 5px 15px rgba(239, 68, 68, 0.2);
+      }
+
+      .progress-container {
+        width: 100%;
+        margin-bottom: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .progress-text {
+        display: flex;
+        justify-content: space-between;
+        font-weight: 500;
+        font-size: 0.875rem;
+        color: var(--text-light);
+      }
+
+      .progress-bar {
+        width: 100%;
+        height: 8px;
+        background-color: #e2e8f0;
+        border-radius: 100px;
+        overflow: hidden;
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary) 0%, var(--gold) 100%);
+        border-radius: 100px;
+        transition: width 0.5s ease;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      }
+
+      .card-counter {
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 0.5rem;
+      }
+
+      .stats-container {
+        display: flex;
+        width: 100%;
+        gap: 1rem;
+        margin-top: 1rem;
+      }
+
+      .stat-card {
+        flex: 1;
+        background: white;
+        border-radius: 12px;
+        padding: 1rem;
+        text-align: center;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+      }
+
+      .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+      }
+
+      .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary);
+        margin-bottom: 0.25rem;
+      }
+
+      .stat-label {
+        font-size: 0.75rem;
+        color: var(--text-light);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 1.5rem;
+        width: 100%;
+      }
+
+      .action-btn {
+        flex: 1;
+        background: transparent;
+        color: var(--text-light);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        padding: 0.6rem;
+        border-radius: 10px;
+        font-size: 0.875rem;
+        transition: all 0.3s ease;
+      }
+
+      .action-btn:hover {
+        background: rgba(0, 0, 0, 0.03);
+        color: var(--text);
+      }
+
+      .reset-btn {
+        background: var(--primary-light);
+        color: var(--primary);
+        border: 1px solid rgba(99, 102, 241, 0.1);
+        padding: 0.85rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 600;
+        margin-top: 1rem;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .reset-btn:hover {
+        background: var(--primary);
+        color: white;
+        box-shadow: 0 5px 15px rgba(99, 102, 241, 0.2);
+      }
+
+      footer {
+        margin-top: 3rem;
+        font-size: 0.875rem;
+        color: var(--text-light);
+        text-align: center;
+        width: 100%;
+        max-width: 520px;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+      }
+
+      .heart {
+        color: #ef4444;
+      }
+
+      .completion-message {
+        text-align: center;
+        margin-bottom: 1.5rem;
+      }
+
+      .completion-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: var(--primary);
+      }
+
+      .completion-subtitle {
+        color: var(--text-light);
+        margin-bottom: 1.5rem;
+      }
+
+      .confetti {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        background-color: var(--primary);
+        opacity: 0;
+      }
+
+      @media (max-width: 600px) {
+        .app-container {
+          padding: 1.5rem;
+          border-radius: 20px;
+        }
+        
+        .flashcard-container {
+          height: 240px;
+        }
+        
+        h1 {
+          font-size: 1.75rem;
+        }
+        
+        .side {
+          font-size: 1.25rem;
+          padding: 1.5rem;
+        }
+        
+        .stats-container {
+          flex-direction: column;
+          gap: 0.75rem;
+        }
+        
+        .stat-card {
+          padding: 0.75rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-container">
+      <header>
+        <div class="logo">
+          <i class="fas fa-brain logo-icon"></i>
+        </div>
+        <h1>Pro Flashcards</h1>
+        <p class="subtitle">Master knowledge with interactive learning</p>
+      </header>
+      
+      <div class="flashcard-container">
+        <div class="flashcard" id="flashcard">
+          <div class="side front" id="card-front">
+            <div class="card-content"></div>
+            <div class="flip-hint"><i class="fas fa-sync-alt fa-spin"></i> Tap to reveal answer</div>
+          </div>
+          <div class="side back" id="card-back">
+            <div class="card-content"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="progress-container">
+        <div class="progress-text">
+          <span id="card-counter"></span>
+          <span id="known-counter"></span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="btn-know" onclick="submitAnswer(true)">
+          <i class="fas fa-check"></i> I Know This
+        </button>
+        <button class="btn-dont" onclick="submitAnswer(false)">
+          <i class="fas fa-times"></i> Still Learning
+        </button>
+      </div>
+      
+      <div class="stats-container">
+        <div class="stat-card">
+          <div class="stat-value" id="completion-rate">0%</div>
+          <div class="stat-label">Completion</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="success-rate">0%</div>
+          <div class="stat-label">Success Rate</div>
+        </div>
+      </div>
+      
+      <div class="action-buttons">
+        <button class="action-btn" onclick="shuffleDeck()">
+          <i class="fas fa-random"></i> Shuffle
+        </button>
+        <button class="action-btn" onclick="resetDeck()">
+          <i class="fas fa-redo"></i> Reset
+        </button>
+      </div>
+    </div>
+
+    <footer>
+      © 2025 FlashCards Pro | Designed for Professional Learning <span class="heart">❤️</span>
+    </footer>
+
+    <script>
+      const deck = [ 
+        { front: "What color are mirror reflections actually?", back: "Slightly green (due to glass tint)" }, 
+        { front: "Which country has the most pyramids in the world?", back: "Sudan" }, 
+        { front: "Which direction does the sun rise on the Moon?", back: "It rises in the East — same as Earth" }, 
+        { front: "How long is a day on Venus (compared to Earth)?", back: "Longer than a Venusian year" }, 
+        { front: "What is the only food that doesn't spoil?", back: "Honey" }, 
+        { front: "What common fruit has its seeds on the outside?", back: "Strawberry" }, 
+        { front: "What is the strongest known material?", back: "Graphene" }, 
+        { front: "Which planet rains diamonds?", back: "Neptune and Uranus" }, 
+        { front: "What language has the most native speakers?", back: "Mandarin Chinese" }, 
+        { front: "What part of your body has no blood supply?", back: "Cornea" }, 
+        { front: "What animal can survive in space?", back: "Tardigrade (Water Bear)" }, 
+        { front: "What's the only number that is both square and cube?", back: "1" }, 
+        { front: "Which letter is not in any US state name?", back: "Q" }, 
+        { front: "How many bones are babies born with?", back: "About 270 (fuse to 206 in adults)" }, 
+        { front: "What is the hottest planet in the solar system?", back: "Venus (not Mercury)" } 
+      ];
+      
+      let currentDeck = [...deck];
+      let index = 0;
+      let known = 0;
+      let attempted = 0;
+
+      // Store DOM elements as variables
+      let flashcard = document.getElementById("flashcard");
+      let front = document.getElementById("card-front").querySelector(".card-content");
+      let back = document.getElementById("card-back").querySelector(".card-content");
+      const cardCounter = document.getElementById("card-counter");
+      const knownCounter = document.getElementById("known-counter");
+      const progressFill = document.getElementById("progress-fill");
+      const completionRate = document.getElementById("completion-rate");
+      const successRate = document.getElementById("success-rate");
+
+      function updateCard() {
+        if (index >= currentDeck.length) {
+          showCompletionScreen();
+          return;
+        }
+        
+        flashcard.classList.remove("flipped");
+        front.textContent = currentDeck[index].front;
+        back.textContent = currentDeck[index].back;
+        updateProgress();
+      }
+      
+      function showCompletionScreen() {
+        // Update final stats before creating completion screen
+        completionRate.textContent = `100%`;
+        successRate.textContent = attempted > 0 ? `${Math.round((known / attempted) * 100)}%` : "0%";
+        knownCounter.textContent = `Known: ${known}`; // Ensure this is updated
+        
+        // Clear the flashcard container
+        const flashcardContainer = document.querySelector(".flashcard-container");
+        flashcardContainer.innerHTML = `
+          <div class="completion-message">
+            <div class="completion-title">Well Done!</div>
+            <div class="completion-subtitle">You've completed the deck with ${known}/${currentDeck.length} correct answers.</div>
+            <button class="reset-btn" onclick="resetDeck()">
+              <i class="fas fa-redo"></i> Study Again
+            </button>
+          </div>
+        `;
+        
+        // Hide controls
+        document.querySelector(".controls").style.display = "none";
+        
+        // Create confetti effect
+        createConfetti();
+      }
+      
+      function createConfetti() {
+        const container = document.querySelector(".app-container");
+        for (let i = 0; i < 50; i++) {
+          const confetti = document.createElement("div");
+          confetti.classList.add("confetti");
+          confetti.style.left = Math.random() * 100 + "%";
+          confetti.style.top = Math.random() * 100 + "%";
+          confetti.style.backgroundColor = getRandomColor();
+          confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+          
+          container.appendChild(confetti);
+          
+          // Animate confetti
+          setTimeout(() => {
+            confetti.style.opacity = 0.7;
+            confetti.style.top = Math.random() * 50 + 50 + "%";
+            confetti.style.transition = `all ${1 + Math.random() * 2}s ease-out`;
+            
+            setTimeout(() => {
+              confetti.style.opacity = 0;
+              setTimeout(() => {
+                confetti.remove();
+              }, 1000);
+            }, 1000 + Math.random() * 1000);
+          }, Math.random() * 500);
+        }
+      }
+      
+      function getRandomColor() {
+        const colors = [
+          "#4f46e5", "#ef4444", "#10b981", "#f59e0b", 
+          "#d4af37", "#8b5cf6", "#ec4899", "#06b6d4"
+        ];
+        return colors[Math.floor(Math.random() * colors.length)];
+      }
+
+      function updateProgress() {
+        const progress = ((index) / currentDeck.length) * 100;
+        progressFill.style.width = `${progress}%`;
+        cardCounter.textContent = `Card ${index + 1} of ${currentDeck.length}`;
+        knownCounter.textContent = `Known: ${known}`;
+        
+        // Update stats with more accurate calculations
+        completionRate.textContent = `${Math.round((index / currentDeck.length) * 100)}%`;
+        successRate.textContent = attempted > 0 ? `${Math.round((known / attempted) * 100)}%` : "0%";
+      }
+
+      function submitAnswer(answeredKnown) {
+        // Fix: First increment the known counter if the answer is correct
+        if (answeredKnown) {
+          known++;
+        }
+        attempted++;
+        
+        // Check if this is the last card before incrementing index
+        if (index === currentDeck.length - 1) {
+          index++;
+          // Update the UI with the final values before showing completion screen
+          updateProgress();
+          showCompletionScreen();
+          return;
+        }
+        
+        // Otherwise, move to the next card
+        index++;
+        updateCard();
+      }
+      
+      function shuffleDeck() {
+        // Save current progress
+        const currentCard = currentDeck[index];
+        
+        // Shuffle remaining cards
+        const seen = currentDeck.slice(0, index);
+        let remaining = currentDeck.slice(index);
+        
+        // Fisher-Yates shuffle algorithm
+        for (let i = remaining.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [remaining[i], remaining[j]] = [remaining[j], remaining[i]];
+        }
+        
+        // Reconstruct deck
+        currentDeck = [...seen, ...remaining];
+        
+        // Update card
+        updateCard();
+      }
+      
+      function resetDeck() {
+        // Shuffle the deck for a fresh start
+        currentDeck = [...deck];
+        for (let i = currentDeck.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [currentDeck[i], currentDeck[j]] = [currentDeck[j], currentDeck[i]];
+        }
+        
+        index = 0;
+        known = 0;
+        attempted = 0;
+        
+        // Reset UI
+        document.querySelector(".controls").style.display = "flex";
+        
+        // Recreate flashcard if it was removed
+        if (!document.getElementById("flashcard")) {
+          const flashcardContainer = document.querySelector(".flashcard-container");
+          flashcardContainer.innerHTML = `
+            <div class="flashcard" id="flashcard">
+              <div class="side front" id="card-front">
+                <div class="card-content"></div>
+                <div class="flip-hint"><i class="fas fa-sync-alt fa-spin"></i> Tap to reveal answer</div>
+              </div>
+              <div class="side back" id="card-back">
+                <div class="card-content"></div>
+              </div>
+            </div>
+          `;
+          
+          // Reattach event listener and update references
+          flashcard = document.getElementById("flashcard");
+          front = document.getElementById("card-front").querySelector(".card-content");
+          back = document.getElementById("card-back").querySelector(".card-content");
+          
+          flashcard.onclick = () => {
+            flashcard.classList.toggle("flipped");
+          };
+        }
+        
+        updateCard();
+      }
+
+      // Initialize click handler
+      flashcard.onclick = () => {
+        flashcard.classList.toggle("flipped");
+      };
+
+      // Initialize the app
+      updateCard();
+    </script>
+  </body>
+</html>
